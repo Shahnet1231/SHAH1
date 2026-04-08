@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SHAH Group — Expenses</title>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="sb-crown">👑</div><h2>SHAH Group</h2><p>Business Management</p></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="ni-icon">🏠</span> Dashboard</a>
+      <a href="sale.html"      class="nav-item"><span class="ni-icon">🛒</span> New Sale</a>
+      <div class="nav-section-label">Accounts</div>
+      <a href="customers.html"  class="nav-item"><span class="ni-icon">👥</span> Customers</a>
+      <a href="suppliers.html"  class="nav-item"><span class="ni-icon">🏭</span> Suppliers</a>
+      <a href="ledger.html"     class="nav-item"><span class="ni-icon">📒</span> Ledger</a>
+      <div class="nav-section-label">Inventory</div>
+      <a href="stock.html"      class="nav-item"><span class="ni-icon">📦</span> Stock</a>
+      <a href="items.html"      class="nav-item"><span class="ni-icon">🏷️</span> Items</a>
+      <div class="nav-section-label">Finance</div>
+      <a href="expenses.html"   class="nav-item active"><span class="ni-icon">💸</span> Expenses</a>
+      <a href="reports.html"    class="nav-item"><span class="ni-icon">📊</span> Reports</a>
+      <div class="nav-section-label">Management</div>
+      <a href="staff.html"      class="nav-item"><span class="ni-icon">👨‍💼</span> Staff</a>
+      <a href="promotions.html" class="nav-item"><span class="ni-icon">📣</span> Promotions</a>
+      <a href="history.html"    class="nav-item"><span class="ni-icon">📋</span> History</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="su-avatar" id="suAvatar">A</div>
+      <div class="su-info"><div class="su-name" id="suName">Admin</div><div class="su-role" id="suRole">admin</div></div>
+      <button class="su-logout" onclick="logout()">🚪</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div><h1>Expenses</h1></div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <div><h2>💸 Dukaan Ka Kharcha</h2><p>Bijli, kiraya, staff, transport — sab yahan</p></div>
+        <button class="btn btn-primary" onclick="openModal()">+ Naya Kharcha</button>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+        <div class="stat-card"><div class="stat-icon red">💸</div><div class="stat-info"><div class="si-label">Aaj Ka Kharcha</div><div class="si-value" id="ex-today">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon amber">📅</div><div class="stat-info"><div class="si-label">Is Mahine</div><div class="si-value" id="ex-month">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple">📊</div><div class="stat-info"><div class="si-label">Total</div><div class="si-value" id="ex-total">0</div></div></div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>EXP-ID</th><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Paid By</th><th>Action</th></tr></thead>
+            <tbody id="expTable"><tr class="loading-row"><td colspan="7"><div class="spinner-sm"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title"><span>💸 Naya Kharcha</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Category *</label>
+        <select id="f-cat">
+          <option>Bijli Bill</option><option>Gas Bill</option><option>Kiraya</option>
+          <option>Staff Salary</option><option>Transport</option><option>Loading/Unloading</option>
+          <option>Maintenance</option><option>Marketing</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Amount *</label><input type="number" id="f-amt" placeholder="0"></div>
+      <div class="form-group"><label>Paid By</label>
+        <select id="f-paid"><option>Cash</option><option>Bank Transfer</option><option>Cheque</option></select>
+      </div>
+      <div class="form-group"><label>Description</label><input type="text" id="f-desc" placeholder="Detail..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveExpense()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+requireLogin();
+const user = getUser();
+document.getElementById('suName').textContent = user.name;
+document.getElementById('suRole').textContent = user.role;
+document.getElementById('suAvatar').textContent = user.name[0].toUpperCase();
+
+const catColors = { 'Bijli Bill':'badge-yellow','Gas Bill':'badge-yellow','Kiraya':'badge-blue','Staff Salary':'badge-purple','Transport':'badge-green','Other':'badge-blue' };
+const todayStr = new Date().toLocaleDateString('en-PK');
+const thisMonth = new Date().toLocaleDateString('en-PK',{month:'numeric',year:'numeric'});
+
+async function loadExpenses() {
+  const res = await apiGet('getExpenses');
+  if (!res.success) return;
+  const data = (res.data||[]).reverse();
+  let todayAmt=0, monthAmt=0, totalAmt=0;
+  data.forEach(e => {
+    const amt = Number(e.Amount)||0;
+    totalAmt += amt;
+    if (String(e.Date).includes(todayStr)) todayAmt += amt;
+    const d = new Date(e.Date);
+    if (!isNaN(d) && d.getMonth()===new Date().getMonth() && d.getFullYear()===new Date().getFullYear()) monthAmt += amt;
+  });
+  document.getElementById('ex-today').textContent = fmtMoney(todayAmt);
+  document.getElementById('ex-month').textContent = fmtMoney(monthAmt);
+  document.getElementById('ex-total').textContent = fmtMoney(totalAmt);
+
+  const tb = document.getElementById('expTable');
+  if (!data.length) { tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="es-icon">💸</div><p>Koi kharcha nahi</p></div></td></tr>'; return; }
+  tb.innerHTML = data.map(e => `
+    <tr>
+      <td class="td-id">${e.ID}</td>
+      <td class="td-muted">${e.Date}</td>
+      <td><span class="badge ${catColors[e.Category]||'badge-blue'}">${e.Category}</span></td>
+      <td>${e.Description||'—'}</td>
+      <td class="td-red" style="font-weight:700">${fmtMoney(e.Amount)}</td>
+      <td class="td-muted">${e.PaidBy||'Cash'}</td>
+      <td><button onclick="delExpense('${e.ID}')" class="btn btn-red btn-sm">🗑️</button></td>
+    </tr>`).join('');
+}
+
+function openModal()  { document.getElementById('modal').style.display='flex'; }
+function closeModal() { document.getElementById('modal').style.display='none'; }
+
+async function saveExpense() {
+  const amt = document.getElementById('f-amt').value;
+  if (!amt) { toast('Amount likhein','error'); return; }
+  const res = await apiPost({ action:'addExpense', category:document.getElementById('f-cat').value, amount:amt, description:document.getElementById('f-desc').value, paidBy:document.getElementById('f-paid').value, userId:user.id });
+  if (res.success) { toast('Kharcha add ho gaya'); closeModal(); loadExpenses(); }
+  else toast(res.error||'Error','error');
+}
+
+async function delExpense(id) {
+  const ok = await confirmDialog('Yeh kharcha delete karna chahte hain?');
+  if (!ok) return;
+  const res = await apiPost({ action:'deleteExpense', id, userId:user.id });
+  if (res.success) { toast('Delete ho gaya'); loadExpenses(); }
+}
+
+loadExpenses();
+</script>
+</body>
+</html>

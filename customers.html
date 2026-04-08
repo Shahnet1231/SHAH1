@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SHAH Group — Customers</title>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="sb-crown">👑</div><h2>SHAH Group</h2><p>Business Management</p></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="ni-icon">🏠</span> Dashboard</a>
+      <a href="sale.html"      class="nav-item"><span class="ni-icon">🛒</span> New Sale</a>
+      <div class="nav-section-label">Accounts</div>
+      <a href="customers.html"  class="nav-item active"><span class="ni-icon">👥</span> Customers</a>
+      <a href="suppliers.html"  class="nav-item"><span class="ni-icon">🏭</span> Suppliers</a>
+      <a href="ledger.html"     class="nav-item"><span class="ni-icon">📒</span> Ledger</a>
+      <div class="nav-section-label">Inventory</div>
+      <a href="stock.html"      class="nav-item"><span class="ni-icon">📦</span> Stock</a>
+      <a href="items.html"      class="nav-item"><span class="ni-icon">🏷️</span> Items</a>
+      <div class="nav-section-label">Finance</div>
+      <a href="expenses.html"   class="nav-item"><span class="ni-icon">💸</span> Expenses</a>
+      <a href="reports.html"    class="nav-item"><span class="ni-icon">📊</span> Reports</a>
+      <div class="nav-section-label">Management</div>
+      <a href="staff.html"      class="nav-item"><span class="ni-icon">👨‍💼</span> Staff</a>
+      <a href="promotions.html" class="nav-item"><span class="ni-icon">📣</span> Promotions</a>
+      <a href="history.html"    class="nav-item"><span class="ni-icon">📋</span> History</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="su-avatar" id="suAvatar">A</div>
+      <div class="su-info"><div class="su-name" id="suName">Admin</div><div class="su-role" id="suRole">admin</div></div>
+      <button class="su-logout" onclick="logout()">🚪</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div><h1>Customers</h1></div>
+      <div class="topbar-search"><span class="ts-icon">🔍</span>
+        <input type="text" id="searchBox" placeholder="ID, naam ya phone..." oninput="filterTable()">
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <div><h2>👥 Customer List</h2><p>Sab customers ka record</p></div>
+        <button class="btn btn-primary" onclick="openModal()">+ Naya Customer</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+        <div class="stat-card"><div class="stat-icon purple">👥</div><div class="stat-info"><div class="si-label">Total</div><div class="si-value" id="sc-total">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">🏪</div><div class="stat-info"><div class="si-label">Regular</div><div class="si-value" id="sc-regular">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon yellow">🚶</div><div class="stat-info"><div class="si-label">Walk-in</div><div class="si-value" id="sc-walkin">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">📤</div><div class="stat-info"><div class="si-label">Total Lena</div><div class="si-value" id="sc-lena">0</div></div></div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>CUS-ID</th><th>Naam</th><th>Phone</th><th>Type</th><th>City</th><th>Balance</th><th>Actions</th></tr></thead>
+            <tbody id="cusTable"><tr class="loading-row"><td colspan="7"><div class="spinner-sm"></div> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal-overlay" id="modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">
+      <span>👥 Naya Customer</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Naam *</label><input type="text" id="f-name" placeholder="Customer naam"></div>
+      <div class="form-group"><label>Phone *</label><input type="text" id="f-phone" placeholder="03XX-XXXXXXX"></div>
+      <div class="form-group"><label>WhatsApp</label><input type="text" id="f-wa" placeholder="Same as phone?"></div>
+      <div class="form-group"><label>Type</label>
+        <select id="f-type">
+          <option>Regular</option><option>Wholesale</option><option>Retail</option><option>Walk-in</option>
+        </select>
+      </div>
+      <div class="form-group"><label>City</label><input type="text" id="f-city" placeholder="City"></div>
+      <div class="form-group"><label>Address</label><input type="text" id="f-addr" placeholder="Address"></div>
+      <div class="form-group"><label>Opening Balance</label><input type="number" id="f-bal" placeholder="0" value="0"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCustomer()">💾 Save Karen</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+requireLogin();
+const user = getUser();
+document.getElementById('suName').textContent   = user.name;
+document.getElementById('suRole').textContent   = user.role;
+document.getElementById('suAvatar').textContent = user.name[0].toUpperCase();
+
+let allCustomers = [];
+
+async function loadCustomers() {
+  const res = await apiGet('getCustomers');
+  if (!res.success) return;
+  allCustomers = res.data || [];
+
+  document.getElementById('sc-total').textContent   = allCustomers.length;
+  document.getElementById('sc-regular').textContent = allCustomers.filter(c => c.Type !== 'Walk-in').length;
+  document.getElementById('sc-walkin').textContent  = allCustomers.filter(c => c.Type === 'Walk-in').length;
+
+  renderTable(allCustomers);
+}
+
+function renderTable(data) {
+  const tb = document.getElementById('cusTable');
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="es-icon">👥</div><p>Koi customer nahi mila</p></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = data.map(c => {
+    const bal = Number(c.OpeningBalance)||0;
+    return `<tr>
+      <td class="td-id">${c.ID}</td>
+      <td><b>${c.Name}</b></td>
+      <td>${c.Phone||'—'}</td>
+      <td><span class="badge ${c.Type==='Walk-in'?'badge-yellow':'badge-purple'}">${c.Type||'—'}</span></td>
+      <td class="td-muted">${c.City||'—'}</td>
+      <td class="${bal>0?'td-red':'td-green'}">${fmtMoney(bal)}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <a href="ledger.html?type=CUSTOMER&id=${c.ID}" class="btn btn-outline btn-sm">📒 Ledger</a>
+        <a href="sale.html?cid=${c.ID}" class="btn btn-primary btn-sm">🛒 Sale</a>
+        ${c.Phone ? `<a href="${waLink(c.Phone,'AOA '+(c.Name||'')+' — SHAH Group')}" target="_blank" class="btn btn-green btn-sm">📱</a>` : ''}
+        <button onclick="delCustomer('${c.ID}')" class="btn btn-red btn-sm">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const filtered = allCustomers.filter(c =>
+    (c.ID||'').toLowerCase().includes(q) ||
+    (c.Name||'').toLowerCase().includes(q) ||
+    (c.Phone||'').includes(q)
+  );
+  renderTable(filtered);
+}
+
+function openModal()  { document.getElementById('modal').style.display='flex'; }
+function closeModal() { document.getElementById('modal').style.display='none'; }
+
+async function saveCustomer() {
+  const name  = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  if (!name) { toast('Naam likhein', 'error'); return; }
+
+  const res = await apiPost({
+    action: 'addCustomer',
+    name, phone,
+    whatsapp: document.getElementById('f-wa').value || phone,
+    type:     document.getElementById('f-type').value,
+    city:     document.getElementById('f-city').value,
+    address:  document.getElementById('f-addr').value,
+    openingBal: document.getElementById('f-bal').value || 0,
+    userId:   user.id
+  });
+
+  if (res.success) {
+    toast('Customer add ho gaya — ' + res.id);
+    closeModal();
+    loadCustomers();
+  } else {
+    toast(res.error || 'Error', 'error');
+  }
+}
+
+async function delCustomer(id) {
+  const ok = await confirmDialog('Customer delete karna chahte hain? Yeh action undo nahi hoga.');
+  if (!ok) return;
+  const res = await apiPost({ action:'deleteCustomer', id, userId:user.id });
+  if (res.success) { toast('Customer delete ho gaya'); loadCustomers(); }
+  else toast(res.error,'error');
+}
+
+loadCustomers();
+</script>
+</body>
+</html>

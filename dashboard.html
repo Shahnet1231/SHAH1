@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SHAH Group — Dashboard</title>
+<link rel="stylesheet" href="theme.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sb-crown">👑</div>
+      <h2>SHAH Group</h2>
+      <p>Business Management</p>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item active"><span class="ni-icon">🏠</span> Dashboard</a>
+      <a href="sale.html"      class="nav-item"><span class="ni-icon">🛒</span> New Sale</a>
+
+      <div class="nav-section-label">Accounts</div>
+      <a href="customers.html"  class="nav-item"><span class="ni-icon">👥</span> Customers</a>
+      <a href="suppliers.html"  class="nav-item"><span class="ni-icon">🏭</span> Suppliers</a>
+      <a href="ledger.html"     class="nav-item"><span class="ni-icon">📒</span> Ledger</a>
+
+      <div class="nav-section-label">Inventory</div>
+      <a href="stock.html"      class="nav-item"><span class="ni-icon">📦</span> Stock <span class="ni-badge" id="lowBadge" style="display:none">!</span></a>
+      <a href="items.html"      class="nav-item"><span class="ni-icon">🏷️</span> Items</a>
+
+      <div class="nav-section-label">Finance</div>
+      <a href="expenses.html"   class="nav-item"><span class="ni-icon">💸</span> Expenses</a>
+      <a href="reports.html"    class="nav-item"><span class="ni-icon">📊</span> Reports</a>
+
+      <div class="nav-section-label">Management</div>
+      <a href="staff.html"      class="nav-item"><span class="ni-icon">👨‍💼</span> Staff</a>
+      <a href="promotions.html" class="nav-item"><span class="ni-icon">📣</span> Promotions</a>
+      <a href="history.html"    class="nav-item"><span class="ni-icon">📋</span> History</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="su-avatar" id="suAvatar">A</div>
+      <div class="su-info">
+        <div class="su-name" id="suName">Admin</div>
+        <div class="su-role" id="suRole">admin</div>
+      </div>
+      <button class="su-logout" onclick="logout()" title="Logout">🚪</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div>
+        <h1>Dashboard</h1>
+        <span class="tb-sub" id="todayDate"></span>
+      </div>
+      <div class="topbar-search">
+        <span class="ts-icon">🔍</span>
+        <input type="text" placeholder="Search karen...">
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Stats Grid -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-icon purple">🛒</div><div class="stat-info"><div class="si-label">Aaj Ki Sale</div><div class="si-value" id="s-sale">...</div><div class="si-sub" id="s-saleCount">0 orders</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-info"><div class="si-label">Aaj Mila</div><div class="si-value" id="s-collected">...</div><div class="si-sub">Cash received</div></div></div>
+        <div class="stat-card"><div class="stat-icon yellow">📈</div><div class="stat-info"><div class="si-label">Aaj Profit</div><div class="si-value" id="s-profit">...</div><div class="si-sub">Sale - Expense</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">💸</div><div class="stat-info"><div class="si-label">Aaj Kharcha</div><div class="si-value" id="s-expense">...</div><div class="si-sub">Today expenses</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue">📥</div><div class="stat-info"><div class="si-label">Total Lena</div><div class="si-value" id="s-lena">...</div><div class="si-sub">Customers se</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">📤</div><div class="stat-info"><div class="si-label">Total Dena</div><div class="si-value" id="s-dena">...</div><div class="si-sub">Suppliers ko</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple">💼</div><div class="stat-info"><div class="si-label">Net Position</div><div class="si-value" id="s-net">...</div><div class="si-sub">Lena - Dena</div></div></div>
+        <div class="stat-card" style="cursor:pointer" onclick="location.href='stock.html'"><div class="stat-icon red">⚠️</div><div class="stat-info"><div class="si-label">Low Stock</div><div class="si-value" id="s-low">...</div><div class="si-sub">Items reorder karein</div></div></div>
+      </div>
+
+      <!-- Charts row -->
+      <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:20px;margin-bottom:24px" id="chartsRow">
+        <div class="card">
+          <div class="card-title">📊 Is Hafte Ki Sale</div>
+          <canvas id="saleChart" height="120"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-title">🏆 Top Items</div>
+          <div id="topItemsList" style="font-size:13px"></div>
+        </div>
+      </div>
+
+      <!-- Low Stock Alerts -->
+      <div class="card" id="lowStockCard" style="margin-bottom:24px;display:none">
+        <div class="card-title" style="color:var(--red)">⚠️ Low Stock Alert</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item ID</th><th>Item</th><th>Quality</th><th>Current Qty</th><th>Min Level</th><th>Action</th></tr></thead>
+            <tbody id="lowStockTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="card">
+        <div class="card-title" style="justify-content:space-between">
+          <span>🧾 Recent Transactions</span>
+          <a href="reports.html" class="btn btn-outline btn-sm">Sab Dekhein</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>TXN ID</th><th>Date</th><th>Customer</th><th>Total</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead>
+            <tbody id="txnTbody"><tr class="loading-row"><td colspan="7"><div class="spinner-sm"></div> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+requireLogin();
+
+const user = getUser();
+document.getElementById('suName').textContent  = user.name;
+document.getElementById('suRole').textContent  = user.role;
+document.getElementById('suAvatar').textContent = user.name[0].toUpperCase();
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-PK',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+async function loadDashboard() {
+  try {
+    const res = await apiGet('getDashboard');
+    if (!res.success) return;
+    const d = res.data;
+
+    document.getElementById('s-sale').textContent      = fmtMoney(d.todaySaleAmount);
+    document.getElementById('s-saleCount').textContent = d.todaySaleCount + ' orders';
+    document.getElementById('s-collected').textContent = fmtMoney(d.todayCollected);
+    document.getElementById('s-profit').textContent    = fmtMoney(d.todayProfit);
+    document.getElementById('s-expense').textContent   = fmtMoney(d.todayExpense);
+    document.getElementById('s-lena').textContent      = fmtMoney(d.totalLena);
+    document.getElementById('s-dena').textContent      = fmtMoney(d.totalDena);
+    document.getElementById('s-net').textContent       = fmtMoney(d.netPosition);
+    document.getElementById('s-low').textContent       = d.lowStockCount + ' items';
+
+    if (d.lowStockCount > 0) {
+      document.getElementById('lowBadge').style.display = 'inline';
+    }
+
+    // Top items
+    const topEl = document.getElementById('topItemsList');
+    if (d.topItems && d.topItems.length > 0) {
+      topEl.innerHTML = d.topItems.map((item, i) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span style="background:var(--purple-ll);color:var(--purple);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${i+1}</span>
+          <span style="flex:1;font-size:13px">${item.itemId}</span>
+          <span class="badge badge-purple">${item.totalQty} units</span>
+        </div>`).join('');
+    } else {
+      topEl.innerHTML = '<div class="empty-state"><div class="es-icon">📦</div><p>Abhi koi sale nahi hui</p></div>';
+    }
+
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+async function loadLowStock() {
+  try {
+    const res = await apiGet('getLowStock');
+    if (!res.success || !res.data.length) return;
+    document.getElementById('lowStockCard').style.display = 'block';
+    document.getElementById('lowStockTbody').innerHTML = res.data.map(item => `
+      <tr>
+        <td class="td-id">${item.ItemID}</td>
+        <td>${item.ItemName}</td>
+        <td><span class="badge badge-purple">${item.Quality}</span></td>
+        <td class="td-red">${item.CurrentQty}</td>
+        <td class="td-muted">${item.MinLevel}</td>
+        <td>
+          <a href="${waLink(item.supplierWhatsApp || '', 'AOA, ' + item.ItemName + ' (' + item.Quality + ') ka rate batain. Quantity: ' + (item.MinLevel * 3) + ' units — SHAH Group')}"
+             target="_blank" class="btn btn-green btn-sm">📱 WA Quotation</a>
+        </td>
+      </tr>`).join('');
+  } catch(e) {}
+}
+
+async function loadRecentTxns() {
+  try {
+    const res = await apiGet('getTransactions');
+    if (!res.success) return;
+    const txns = (res.data || []).reverse().slice(0, 10);
+    if (!txns.length) {
+      document.getElementById('txnTbody').innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="es-icon">🧾</div><p>Koi transaction nahi</p></div></td></tr>';
+      return;
+    }
+    document.getElementById('txnTbody').innerHTML = txns.map(t => `
+      <tr>
+        <td class="td-id">${t.ID}</td>
+        <td class="td-muted">${t.Date}</td>
+        <td>${t.CustomerID}</td>
+        <td class="td-amount">${fmtMoney(t.Total)}</td>
+        <td class="td-green">${fmtMoney(t.Paid)}</td>
+        <td class="${Number(t.Balance)>0?'td-red':'td-green'}">${fmtMoney(t.Balance)}</td>
+        <td><a href="sale.html?view=${t.ID}" class="btn btn-outline btn-sm">View</a></td>
+      </tr>`).join('');
+  } catch(e) {}
+}
+
+// Weekly sale chart (dummy for now — real data needs date grouping)
+function drawChart() {
+  const ctx = document.getElementById('saleChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets: [{
+        label: 'Sale (Rs.)',
+        data: [0,0,0,0,0,0,0],
+        borderColor: '#7c3aed',
+        backgroundColor: 'rgba(124,58,237,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#7c3aed',
+        pointRadius: 4,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero:true, grid:{ color:'rgba(124,58,237,0.06)' }, ticks:{ font:{ family:'Poppins', size:11 } } },
+        x: { grid:{ display:false }, ticks:{ font:{ family:'Poppins', size:11 } } }
+      }
+    }
+  });
+}
+
+// Responsive chart fix
+window.addEventListener('resize', () => {
+  const r = document.getElementById('chartsRow');
+  if (window.innerWidth < 640) r.style.gridTemplateColumns = '1fr';
+  else r.style.gridTemplateColumns = '1.6fr 1fr';
+});
+if (window.innerWidth < 640) document.getElementById('chartsRow').style.gridTemplateColumns = '1fr';
+
+loadDashboard();
+loadLowStock();
+loadRecentTxns();
+drawChart();
+</script>
+</body>
+</html>

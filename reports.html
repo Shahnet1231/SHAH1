@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SHAH Group — Reports</title>
+<link rel="stylesheet" href="theme.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="sb-crown">👑</div><h2>SHAH Group</h2><p>Business Management</p></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="ni-icon">🏠</span> Dashboard</a>
+      <a href="sale.html" class="nav-item"><span class="ni-icon">🛒</span> New Sale</a>
+      <div class="nav-section-label">Accounts</div>
+      <a href="customers.html" class="nav-item"><span class="ni-icon">👥</span> Customers</a>
+      <a href="suppliers.html" class="nav-item"><span class="ni-icon">🏭</span> Suppliers</a>
+      <a href="ledger.html" class="nav-item"><span class="ni-icon">📒</span> Ledger</a>
+      <div class="nav-section-label">Inventory</div>
+      <a href="stock.html" class="nav-item"><span class="ni-icon">📦</span> Stock</a>
+      <a href="items.html" class="nav-item"><span class="ni-icon">🏷️</span> Items</a>
+      <div class="nav-section-label">Finance</div>
+      <a href="expenses.html" class="nav-item"><span class="ni-icon">💸</span> Expenses</a>
+      <a href="reports.html" class="nav-item active"><span class="ni-icon">📊</span> Reports</a>
+      <div class="nav-section-label">Management</div>
+      <a href="staff.html" class="nav-item"><span class="ni-icon">👨‍💼</span> Staff</a>
+      <a href="promotions.html" class="nav-item"><span class="ni-icon">📣</span> Promotions</a>
+      <a href="history.html" class="nav-item"><span class="ni-icon">📋</span> History</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="su-avatar" id="suAvatar">A</div>
+      <div class="su-info"><div class="su-name" id="suName">Admin</div><div class="su-role" id="suRole">admin</div></div>
+      <button class="su-logout" onclick="logout()">🚪</button>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div><h1>Reports</h1></div>
+    </header>
+    <div class="page-body">
+      <div class="tabs" style="margin-bottom:20px">
+        <button class="tab-btn active" onclick="switchTab('sale',this)">🛒 Sale Report</button>
+        <button class="tab-btn" onclick="switchTab('finance',this)">💰 Finance Report</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+          <div class="form-group" style="margin:0"><label>From Date</label><input type="date" id="rFrom"></div>
+          <div class="form-group" style="margin:0"><label>To Date</label><input type="date" id="rTo"></div>
+          <button class="btn btn-primary" onclick="loadReport()">📊 Report Generate</button>
+          <button class="btn btn-outline" onclick="printDiv('reportTable')">🖨️ Print</button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="stats-grid" id="reportStats" style="display:none;margin-bottom:20px"></div>
+
+      <!-- Charts -->
+      <div id="tab-sale">
+        <div class="card" style="margin-bottom:20px" id="saleChartCard" style="display:none">
+          <div class="card-title">📊 Sale Chart</div>
+          <canvas id="reportChart" height="100"></canvas>
+        </div>
+        <div class="card" id="reportTableCard" style="display:none">
+          <div class="card-title" style="justify-content:space-between">
+            <span>🧾 Sale Transactions</span>
+            <span id="reportCount" class="badge badge-purple"></span>
+          </div>
+          <div class="table-wrap" id="reportTable">
+            <table>
+              <thead><tr><th>TXN-ID</th><th>Date</th><th>Customer</th><th>Total</th><th>Paid</th><th>Balance</th></tr></thead>
+              <tbody id="reportTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-finance" style="display:none">
+        <div class="card">
+          <div class="card-title">💰 Finance Summary</div>
+          <div id="financeReport"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+requireLogin();
+const user = getUser();
+document.getElementById('suName').textContent = user.name;
+document.getElementById('suRole').textContent = user.role;
+document.getElementById('suAvatar').textContent = user.name[0].toUpperCase();
+
+let currentTab = 'sale';
+let reportChart = null;
+
+function switchTab(name, btn) {
+  currentTab = name;
+  document.getElementById('tab-sale').style.display    = name==='sale'    ? 'block' : 'none';
+  document.getElementById('tab-finance').style.display = name==='finance' ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Set default dates (this month)
+const now = new Date();
+document.getElementById('rFrom').value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10);
+document.getElementById('rTo').value   = new Date().toISOString().slice(0,10);
+
+async function loadReport() {
+  const from = document.getElementById('rFrom').value;
+  const to   = document.getElementById('rTo').value;
+
+  if (currentTab === 'sale') {
+    const res = await apiGet('getSaleReport', { from, to });
+    if (!res.success) { toast('Error loading report','error'); return; }
+    const s = res.summary;
+
+    document.getElementById('reportStats').style.display = 'grid';
+    document.getElementById('reportStats').innerHTML = `
+      <div class="stat-card"><div class="stat-icon purple">🛒</div><div class="stat-info"><div class="si-label">Total Sale</div><div class="si-value">${fmtMoney(s.total)}</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-info"><div class="si-label">Total Mila</div><div class="si-value">${fmtMoney(s.paid)}</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">📤</div><div class="stat-info"><div class="si-label">Baaki</div><div class="si-value">${fmtMoney(s.balance)}</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue">📋</div><div class="stat-info"><div class="si-label">Orders</div><div class="si-value">${s.count}</div></div></div>
+    `;
+
+    document.getElementById('reportTableCard').style.display = 'block';
+    document.getElementById('reportCount').textContent = s.count + ' orders';
+
+    const data = res.data || [];
+    document.getElementById('reportTbody').innerHTML = !data.length
+      ? '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">Koi transaction nahi</td></tr>'
+      : data.map(t => `
+        <tr>
+          <td class="td-id">${t.ID}</td>
+          <td class="td-muted">${t.Date}</td>
+          <td>${t.CustomerID}</td>
+          <td class="td-amount">${fmtMoney(t.Total)}</td>
+          <td class="td-green">${fmtMoney(t.Paid)}</td>
+          <td class="${Number(t.Balance)>0?'td-red':'td-green'}">${fmtMoney(t.Balance)}</td>
+        </tr>`).join('');
+
+  } else {
+    const res = await apiGet('getFinanceReport', { from, to });
+    if (!res.success) { toast('Error','error'); return; }
+    const d = res.data;
+    document.getElementById('financeReport').innerHTML = `
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+        <div class="stat-card"><div class="stat-icon purple">📈</div><div class="stat-info"><div class="si-label">Total Sale</div><div class="si-value">${fmtMoney(d.totalSale)}</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-info"><div class="si-label">Amount Mila</div><div class="si-value">${fmtMoney(d.totalPaid)}</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">💸</div><div class="stat-info"><div class="si-label">Total Kharcha</div><div class="si-value">${fmtMoney(d.totalExpense)}</div></div></div>
+        <div class="stat-card"><div class="stat-icon ${d.netProfit>=0?'green':'red'}">📊</div><div class="stat-info"><div class="si-label">Net Profit</div><div class="si-value" style="color:var(${d.netProfit>=0?'--green':'--red'})">${fmtMoney(d.netProfit)}</div></div></div>
+      </div>
+    `;
+  }
+}
+
+loadReport();
+</script>
+</body>
+</html>

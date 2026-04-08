@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SHAH Group — Items</title>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="sb-crown">👑</div><h2>SHAH Group</h2><p>Business Management</p></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="ni-icon">🏠</span> Dashboard</a>
+      <a href="sale.html"      class="nav-item"><span class="ni-icon">🛒</span> New Sale</a>
+      <div class="nav-section-label">Accounts</div>
+      <a href="customers.html"  class="nav-item"><span class="ni-icon">👥</span> Customers</a>
+      <a href="suppliers.html"  class="nav-item"><span class="ni-icon">🏭</span> Suppliers</a>
+      <a href="ledger.html"     class="nav-item"><span class="ni-icon">📒</span> Ledger</a>
+      <div class="nav-section-label">Inventory</div>
+      <a href="stock.html"      class="nav-item"><span class="ni-icon">📦</span> Stock</a>
+      <a href="items.html"      class="nav-item active"><span class="ni-icon">🏷️</span> Items</a>
+      <div class="nav-section-label">Finance</div>
+      <a href="expenses.html"   class="nav-item"><span class="ni-icon">💸</span> Expenses</a>
+      <a href="reports.html"    class="nav-item"><span class="ni-icon">📊</span> Reports</a>
+      <div class="nav-section-label">Management</div>
+      <a href="staff.html"      class="nav-item"><span class="ni-icon">👨‍💼</span> Staff</a>
+      <a href="promotions.html" class="nav-item"><span class="ni-icon">📣</span> Promotions</a>
+      <a href="history.html"    class="nav-item"><span class="ni-icon">📋</span> History</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="su-avatar" id="suAvatar">A</div>
+      <div class="su-info"><div class="su-name" id="suName">Admin</div><div class="su-role" id="suRole">admin</div></div>
+      <button class="su-logout" onclick="logout()">🚪</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div><h1>Items</h1></div>
+      <div class="topbar-search"><span class="ts-icon">🔍</span>
+        <input type="text" id="searchBox" placeholder="Naam ya category..." oninput="filterTable()">
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <div><h2>🏷️ Items / Maal</h2><p>Multi-quality items — har quality alag ID ke saath</p></div>
+        <button class="btn btn-primary" onclick="openModal()">+ Naya Item</button>
+      </div>
+
+      <!-- info note -->
+      <div style="background:var(--blue-l);border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#1e40af">
+        💡 <b>Multi-Quality:</b> Ek hi naam ka item alag alag quality mein add karein — jaise Basmati <b>Premium (ITM-001-A)</b>, <b>Standard (ITM-001-B)</b>, <b>Economy (ITM-001-C)</b> — har quality ka alag stock aur rate hoga.
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ITM-ID</th><th>Naam</th><th>Category</th><th>Quality</th><th>Unit</th><th>Buy Rate</th><th>Sell Rate</th><th>Min Stock</th><th>Actions</th></tr></thead>
+            <tbody id="itmTable"><tr class="loading-row"><td colspan="9"><div class="spinner-sm"></div> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">
+      <span>🏷️ Naya Item / Quality</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Item Naam *</label><input type="text" id="f-name" placeholder="e.g. Basmati Chawal"></div>
+      <div class="form-group"><label>Category</label><input type="text" id="f-cat" placeholder="e.g. Chawal, Oil, Sugar"></div>
+      <div class="form-group"><label>Quality *</label>
+        <select id="f-quality">
+          <option>Premium</option><option selected>Standard</option><option>Economy</option>
+          <option>Grade A</option><option>Grade B</option><option>Grade C</option>
+          <option>Super Fine</option><option>Fine</option><option>Coarse</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Unit</label>
+        <select id="f-unit">
+          <option>kg</option><option>piece</option><option>liter</option><option>box</option>
+          <option>bag</option><option>dozen</option><option>meter</option><option>ton</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Buy Rate (per unit)</label><input type="number" id="f-buy" placeholder="0"></div>
+      <div class="form-group"><label>Sell Rate (per unit)</label><input type="number" id="f-sell" placeholder="0"></div>
+      <div class="form-group"><label>Opening Stock</label><input type="number" id="f-qty" placeholder="0" value="0"></div>
+      <div class="form-group"><label>Min Stock Level</label><input type="number" id="f-min" placeholder="10" value="10"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItem()">💾 Save Karen</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+requireLogin();
+const user = getUser();
+document.getElementById('suName').textContent   = user.name;
+document.getElementById('suRole').textContent   = user.role;
+document.getElementById('suAvatar').textContent = user.name[0].toUpperCase();
+
+let allItems = [];
+
+async function loadItems() {
+  const res = await apiGet('getItems');
+  if (!res.success) return;
+  allItems = res.data || [];
+  renderTable(allItems);
+}
+
+const qualityColors = { Premium:'badge-green', Standard:'badge-purple', Economy:'badge-yellow', 'Grade A':'badge-green', 'Grade B':'badge-purple', 'Grade C':'badge-yellow' };
+
+function renderTable(data) {
+  const tb = document.getElementById('itmTable');
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="es-icon">🏷️</div><p>Koi item nahi mila</p></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = data.map(i => `
+    <tr>
+      <td class="td-id">${i.ID}</td>
+      <td><b>${i.Name}</b></td>
+      <td class="td-muted">${i.Category||'—'}</td>
+      <td><span class="badge ${qualityColors[i.Quality]||'badge-blue'}">${i.Quality||'Standard'}</span></td>
+      <td class="td-muted">${i.Unit||'piece'}</td>
+      <td class="td-amount">Rs. ${Number(i.BuyRate||0).toLocaleString()}</td>
+      <td class="td-green">Rs. ${Number(i.SellRate||0).toLocaleString()}</td>
+      <td class="td-muted">${i.MinStock||10}</td>
+      <td style="display:flex;gap:6px">
+        <a href="stock.html?item=${i.ID}" class="btn btn-outline btn-sm">📦 Stock</a>
+        <button onclick="delItem('${i.ID}')" class="btn btn-red btn-sm">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterTable() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  renderTable(allItems.filter(i =>
+    (i.Name||'').toLowerCase().includes(q) ||
+    (i.Category||'').toLowerCase().includes(q) ||
+    (i.ID||'').toLowerCase().includes(q)
+  ));
+}
+
+function openModal()  { document.getElementById('modal').style.display='flex'; }
+function closeModal() { document.getElementById('modal').style.display='none'; }
+
+async function saveItem() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { toast('Item naam likhein','error'); return; }
+  const res = await apiPost({
+    action: 'addItem', name,
+    category: document.getElementById('f-cat').value,
+    quality:  document.getElementById('f-quality').value,
+    unit:     document.getElementById('f-unit').value,
+    buyRate:  document.getElementById('f-buy').value || 0,
+    sellRate: document.getElementById('f-sell').value || 0,
+    openQty:  document.getElementById('f-qty').value || 0,
+    minStock: document.getElementById('f-min').value || 10,
+    userId:   user.id
+  });
+  if (res.success) { toast('Item add ho gaya — ' + res.id); closeModal(); loadItems(); }
+  else toast(res.error||'Error','error');
+}
+
+async function delItem(id) {
+  const ok = await confirmDialog('Item delete karna chahte hain?');
+  if (!ok) return;
+  const res = await apiPost({ action:'deleteItem', id, userId:user.id });
+  if (res.success) { toast('Delete ho gaya'); loadItems(); }
+  else toast(res.error,'error');
+}
+
+loadItems();
+</script>
+</body>
+</html>
