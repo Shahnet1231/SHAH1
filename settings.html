@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SHAH Group — Settings</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+.toggle-wrap{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-info h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+.toggle-info p{font-size:12px;color:var(--muted)}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:#ddd;border-radius:24px;transition:.3s}
+.slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s}
+input:checked+.slider{background:var(--purple)}
+input:checked+.slider:before{transform:translateX(20px)}
+.perm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.perm-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text)}
+.perm-item input{accent-color:var(--purple)}
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="sb-crown">👑</div><h2>SHAH Group</h2><p>Business Management</p></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="ni-icon">🏠</span> Dashboard</a>
+      <a href="sale.html"      class="nav-item"><span class="ni-icon">🧾</span> New Invoice</a>
+      <a href="purchase.html"  class="nav-item"><span class="ni-icon">🛒</span> New Purchase</a>
+      <div class="nav-section-label">Accounts</div>
+      <a href="customers.html"  class="nav-item"><span class="ni-icon">👥</span> Customers</a>
+      <a href="suppliers.html"  class="nav-item"><span class="ni-icon">🏭</span> Suppliers</a>
+      <a href="ledger.html"     class="nav-item"><span class="ni-icon">📒</span> Ledger</a>
+      <div class="nav-section-label">Inventory</div>
+      <a href="stock.html"      class="nav-item"><span class="ni-icon">📦</span> Stock</a>
+      <a href="items.html"      class="nav-item"><span class="ni-icon">🏷️</span> Items</a>
+      <div class="nav-section-label">Finance</div>
+      <a href="expenses.html"   class="nav-item"><span class="ni-icon">💸</span> Expenses</a>
+      <a href="reports.html"    class="nav-item"><span class="ni-icon">📊</span> Reports</a>
+      <div class="nav-section-label">Management</div>
+      <a href="staff.html"      class="nav-item"><span class="ni-icon">👨‍💼</span> Staff</a>
+      <a href="promotions.html" class="nav-item"><span class="ni-icon">📣</span> Promotions</a>
+      <a href="history.html"    class="nav-item"><span class="ni-icon">📋</span> History</a>
+      <a href="bulk-upload.html" class="nav-item"><span class="ni-icon">📤</span> Bulk Upload</a>
+      <a href="settings.html"   class="nav-item active"><span class="ni-icon">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="su-avatar" id="suAvatar">A</div>
+      <div class="su-info"><div class="su-name" id="suName">Admin</div><div class="su-role" id="suRole">admin</div></div>
+      <button class="su-logout" onclick="logout()">🚪</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div><h1>Settings</h1></div>
+    </header>
+
+    <div class="page-body">
+
+      <div class="tabs" style="margin-bottom:20px">
+        <button class="tab-btn active" onclick="switchTab('general',this)">⚙️ General</button>
+        <button class="tab-btn" onclick="switchTab('users',this)">👥 Users</button>
+        <button class="tab-btn" onclick="switchTab('connect',this)">🔗 Connect</button>
+      </div>
+
+      <!-- GENERAL SETTINGS -->
+      <div id="tab-general">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+          <!-- Company Info -->
+          <div class="card">
+            <div class="card-title">🏢 Company Info</div>
+            <div class="form-grid">
+              <div class="form-group" style="grid-column:1/-1"><label>Company Name</label><input type="text" id="s-companyName" placeholder="SHAH Group Of Business Management"></div>
+              <div class="form-group"><label>Phone</label><input type="text" id="s-companyPhone" placeholder="0300-XXXXXXX"></div>
+              <div class="form-group"><label>WhatsApp</label><input type="text" id="s-companyWA" placeholder="0300-XXXXXXX"></div>
+              <div class="form-group" style="grid-column:1/-1"><label>Address</label><input type="text" id="s-companyAddr" placeholder="Dukaan ka address"></div>
+              <div class="form-group"><label>City</label><input type="text" id="s-companyCity" placeholder="City"></div>
+              <div class="form-group"><label>Email</label><input type="email" id="s-companyEmail" placeholder="email@domain.com"></div>
+            </div>
+            <div style="margin-top:16px">
+              <button class="btn btn-primary" onclick="saveCompanyInfo()">💾 Save Company Info</button>
+            </div>
+          </div>
+
+          <!-- Preferences -->
+          <div class="card">
+            <div class="card-title">🎨 Preferences</div>
+
+            <div class="toggle-wrap">
+              <div class="toggle-info">
+                <h4>Dark Mode</h4>
+                <p>Dark theme enable karein</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-wrap">
+              <div class="toggle-info">
+                <h4>Low Stock Alert</h4>
+                <p>Dashboard par red alert dikhao</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="lowStockAlert" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-wrap">
+              <div class="toggle-info">
+                <h4>Auto Print Invoice</h4>
+                <p>Sale ke baad auto print dialog</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="autoPrint">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div style="margin-top:16px">
+              <button class="btn btn-primary" onclick="savePreferences()">💾 Save Preferences</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- USERS MANAGEMENT -->
+      <div id="tab-users" style="display:none">
+        <div class="page-header">
+          <div><h2>👥 User Management</h2><p>Users, passwords aur access control</p></div>
+          <button class="btn btn-primary" onclick="openUserModal()">+ Naya User</button>
+        </div>
+
+        <div style="background:var(--blue-l);border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#1e40af">
+          🔐 <b>Roles:</b>
+          <b>Admin</b> — sab kuch |
+          <b>Cashier</b> — sale, purchase, customers |
+          <b>Viewer</b> — sirf dekh sakta hai, kuch change nahi
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Naam</th><th>Username</th><th>Role</th><th>Permissions</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="usersTbody"><tr class="loading-row"><td colspan="7"><div class="spinner-sm"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONNECT / API -->
+      <div id="tab-connect" style="display:none">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-title">🔗 Google Sheet API Connect</div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label>Apps Script URL (API URL)</label>
+            <input type="text" id="s-apiUrl" placeholder="https://script.google.com/macros/s/.../exec">
+          </div>
+          <div style="background:var(--purple-ll);border-radius:8px;padding:12px;font-size:12px;color:var(--purple-d);margin-bottom:16px;line-height:1.7">
+            <b>Current URL:</b><br>
+            <span id="currentApiUrl" style="word-break:break-all;font-size:11px">Loading...</span>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="saveApiUrl()">💾 URL Save Karen</button>
+            <button class="btn btn-outline" onclick="testConnection()">🔍 Test Connection</button>
+          </div>
+          <div id="connTestResult" style="margin-top:12px;display:none"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 System Info</div>
+          <div style="font-size:13px;line-height:2">
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:6px 0"><span>System Version</span><span class="badge badge-purple">v2.0</span></div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:6px 0"><span>Hosting</span><span class="badge badge-green">GitHub Pages</span></div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:6px 0"><span>Database</span><span class="badge badge-blue">Google Sheets</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0"><span>API Status</span><span id="apiStatus" class="badge badge-yellow">Checking...</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-overlay" id="userModal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">
+      <span>👤 Naya User</span>
+      <button class="modal-close" onclick="closeUserModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Poora Naam *</label><input type="text" id="u-name" placeholder="Muhammad Ali"></div>
+      <div class="form-group"><label>Username *</label><input type="text" id="u-uname" placeholder="mali (lowercase)"></div>
+      <div class="form-group"><label>Password *</label><input type="text" id="u-pass" placeholder="Strong password"></div>
+      <div class="form-group"><label>Role *</label>
+        <select id="u-role" onchange="updatePermPreview()">
+          <option value="admin">Admin (Sab kuch)</option>
+          <option value="cashier">Cashier (Sale + Purchase)</option>
+          <option value="viewer">Viewer (Sirf dekhna)</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Permissions -->
+    <div style="margin-top:16px">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Permissions</div>
+      <div class="perm-grid">
+        <label class="perm-item"><input type="checkbox" id="p-sale" checked> Sale/Invoice</label>
+        <label class="perm-item"><input type="checkbox" id="p-purchase" checked> Purchase</label>
+        <label class="perm-item"><input type="checkbox" id="p-customers" checked> Customers</label>
+        <label class="perm-item"><input type="checkbox" id="p-suppliers" checked> Suppliers</label>
+        <label class="perm-item"><input type="checkbox" id="p-stock" checked> Stock</label>
+        <label class="perm-item"><input type="checkbox" id="p-items" checked> Items</label>
+        <label class="perm-item"><input type="checkbox" id="p-ledger" checked> Ledger</label>
+        <label class="perm-item"><input type="checkbox" id="p-expenses" checked> Expenses</label>
+        <label class="perm-item"><input type="checkbox" id="p-reports" checked> Reports</label>
+        <label class="perm-item"><input type="checkbox" id="p-staff" checked> Staff</label>
+        <label class="perm-item"><input type="checkbox" id="p-promotions" checked> Promotions</label>
+        <label class="perm-item"><input type="checkbox" id="p-settings"> Settings</label>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeUserModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUser()">💾 Save Karen</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+requireLogin();
+const user = getUser();
+// Only admin can access settings
+if (user.role !== 'admin') { toast('Settings sirf Admin ke liye hai','error'); setTimeout(()=>location.href='dashboard.html',1500); }
+document.getElementById('suName').textContent   = user.name;
+document.getElementById('suRole').textContent   = user.role;
+document.getElementById('suAvatar').textContent = user.name[0].toUpperCase();
+
+function switchTab(name, btn) {
+  ['general','users','connect'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (name==='users') loadUsers();
+  if (name==='connect') loadConnectInfo();
+}
+
+// Dark mode
+function toggleDarkMode(on) {
+  document.documentElement.setAttribute('data-theme', on ? 'dark' : 'light');
+  localStorage.setItem('bms_darkMode', on ? '1' : '0');
+}
+
+// Load dark mode
+if (localStorage.getItem('bms_darkMode')==='1') {
+  document.documentElement.setAttribute('data-theme','dark');
+  setTimeout(() => { const t = document.getElementById('darkModeToggle'); if(t) t.checked=true; }, 100);
+}
+
+// Load settings
+async function loadSettings() {
+  const res = await apiGet('getSettings');
+  if (!res.success) return;
+  const s = res.data;
+  if (s.companyName)  document.getElementById('s-companyName').value  = s.companyName;
+  if (s.companyPhone) document.getElementById('s-companyPhone').value = s.companyPhone;
+  if (s.companyWA)    document.getElementById('s-companyWA').value    = s.companyWA;
+  if (s.companyAddr)  document.getElementById('s-companyAddr').value  = s.companyAddr;
+  if (s.companyCity)  document.getElementById('s-companyCity').value  = s.companyCity;
+  if (s.companyEmail) document.getElementById('s-companyEmail').value = s.companyEmail;
+}
+
+async function saveCompanyInfo() {
+  const res = await apiPost({
+    action: 'saveSettings',
+    settings: {
+      companyName:  document.getElementById('s-companyName').value,
+      companyPhone: document.getElementById('s-companyPhone').value,
+      companyWA:    document.getElementById('s-companyWA').value,
+      companyAddr:  document.getElementById('s-companyAddr').value,
+      companyCity:  document.getElementById('s-companyCity').value,
+      companyEmail: document.getElementById('s-companyEmail').value,
+    },
+    userId: user.id
+  });
+  if (res.success) toast('Company info save ho gayi!');
+  else toast(res.error||'Error','error');
+}
+
+async function savePreferences() {
+  const res = await apiPost({
+    action: 'saveSettings',
+    settings: {
+      darkMode:      document.getElementById('darkModeToggle').checked ? '1' : '0',
+      lowStockAlert: document.getElementById('lowStockAlert').checked ? '1' : '0',
+      autoPrint:     document.getElementById('autoPrint').checked ? '1' : '0',
+    },
+    userId: user.id
+  });
+  if (res.success) toast('Preferences save ho gayi!');
+  else toast(res.error||'Error','error');
+}
+
+// Users
+async function loadUsers() {
+  const res = await apiGet('getUsers');
+  if (!res.success) return;
+  const tb = document.getElementById('usersTbody');
+  const data = res.data || [];
+  if (!data.length) { tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">Koi user nahi</td></tr>'; return; }
+  tb.innerHTML = data.map(u => `
+    <tr>
+      <td class="td-id">${u.ID}</td>
+      <td><b>${u.Name}</b></td>
+      <td>${u.Username}</td>
+      <td><span class="badge ${u.Role==='admin'?'badge-red':u.Role==='cashier'?'badge-purple':'badge-blue'}">${u.Role}</span></td>
+      <td style="font-size:11px;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis">${u.Permissions||'—'}</td>
+      <td><span class="badge ${u.Status==='Active'?'badge-green':'badge-red'}">${u.Status||'Active'}</span></td>
+      <td style="display:flex;gap:6px">
+        <button onclick="toggleUserStatus('${u.ID}','${u.Status}')" class="btn btn-outline btn-sm">${u.Status==='Active'?'🔒 Block':'✅ Activate'}</button>
+        ${u.ID!=='USR-001'?`<button onclick="delUser('${u.ID}')" class="btn btn-red btn-sm">🗑️</button>`:''}
+      </td>
+    </tr>`).join('');
+}
+
+function openUserModal()  { updatePermPreview(); document.getElementById('userModal').style.display='flex'; }
+function closeUserModal() { document.getElementById('userModal').style.display='none'; }
+
+function updatePermPreview() {
+  const role = document.getElementById('u-role').value;
+  const perms = {
+    admin:   ['sale','purchase','customers','suppliers','stock','items','ledger','expenses','reports','staff','promotions','settings'],
+    cashier: ['sale','purchase','customers','suppliers','stock','items','ledger'],
+    viewer:  ['sale','customers','reports'],
+    custom:  []
+  };
+  const p = perms[role] || [];
+  ['sale','purchase','customers','suppliers','stock','items','ledger','expenses','reports','staff','promotions','settings'].forEach(key => {
+    const el = document.getElementById('p-'+key);
+    if (el) { el.checked = p.includes(key); el.disabled = role !== 'custom'; }
+  });
+}
+
+async function saveUser() {
+  const name  = document.getElementById('u-name').value.trim();
+  const uname = document.getElementById('u-uname').value.trim();
+  const pass  = document.getElementById('u-pass').value.trim();
+  if (!name||!uname||!pass) { toast('Sab fields fill karein','error'); return; }
+
+  const permKeys = ['sale','purchase','customers','suppliers','stock','items','ledger','expenses','reports','staff','promotions','settings'];
+  const perms = permKeys.filter(k => document.getElementById('p-'+k)?.checked).join(',');
+
+  const res = await apiPost({ action:'addUser', name, username:uname, password:pass, role:document.getElementById('u-role').value, permissions:perms, userId:user.id });
+  if (res.success) { toast('User add ho gaya — '+res.id); closeUserModal(); loadUsers(); }
+  else toast(res.error||'Error','error');
+}
+
+async function toggleUserStatus(id, currentStatus) {
+  const newStatus = currentStatus==='Active' ? 'Inactive' : 'Active';
+  const res = await apiPost({ action:'updateUser', id, Status:newStatus, userId:user.id });
+  if (res.success) { toast('Status update ho gaya'); loadUsers(); }
+  else toast(res.error,'error');
+}
+
+async function delUser(id) {
+  const ok = await confirmDialog('User delete karna chahte hain?');
+  if (!ok) return;
+  const res = await apiPost({ action:'deleteUser', id, userId:user.id });
+  if (res.success) { toast('Delete ho gaya'); loadUsers(); }
+  else toast(res.error,'error');
+}
+
+// Connect
+function loadConnectInfo() {
+  document.getElementById('currentApiUrl').textContent = API_URL;
+  document.getElementById('s-apiUrl').value = API_URL;
+  testConnection();
+}
+
+async function testConnection() {
+  const el = document.getElementById('apiStatus');
+  const res2 = document.getElementById('connTestResult');
+  el.textContent = 'Testing...';
+  el.className = 'badge badge-yellow';
+  try {
+    const res = await apiGet('getDashboard');
+    if (res.success) {
+      el.textContent = '✅ Connected';
+      el.className = 'badge badge-green';
+      res2.style.display = 'block';
+      res2.innerHTML = '<div style="background:var(--green-l);border:1px solid #a7f3d0;border-radius:8px;padding:10px;font-size:13px;color:#065f46">✅ Connection successful! Google Sheet se data aa raha hai.</div>';
+    } else throw new Error(res.error);
+  } catch(e) {
+    el.textContent = '❌ Error';
+    el.className = 'badge badge-red';
+    res2.style.display = 'block';
+    res2.innerHTML = `<div style="background:var(--red-l);border:1px solid #fecaca;border-radius:8px;padding:10px;font-size:13px;color:#dc2626">❌ Connection failed: ${e.message}</div>`;
+  }
+}
+
+async function saveApiUrl() {
+  const newUrl = document.getElementById('s-apiUrl').value.trim();
+  if (!newUrl) { toast('URL likhein','error'); return; }
+  localStorage.setItem('bms_apiUrl', newUrl);
+  toast('URL save ho gayi! Page reload hoga...');
+  setTimeout(() => location.reload(), 1500);
+}
+
+loadSettings();
+</script>
+</body>
+</html>
