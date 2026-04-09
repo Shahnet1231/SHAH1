@@ -3,7 +3,7 @@
 // ============================================================
 
 // API URL — localStorage se override possible
-const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyG4sce-iVMvxekaMy1acoSImgVB8--GEEGiU18z_5UrNNivs6jHLDpNiSMUvtfebYQAw/exec";
+const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbxbZSwKR9Yo8BZj-isb6Bn4eB4pK7iUEw6RUeQ3n3B5XSQ3M0NNeYbf4xTYxL7I7SBz/exec";
 const API_URL = localStorage.getItem('bms_apiUrl') || DEFAULT_API_URL;
 
 // Dark mode auto apply
