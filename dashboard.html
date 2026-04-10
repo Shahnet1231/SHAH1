@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SHAH Group — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --font:'Nunito',sans-serif;
+  --purple:#7c3aed;--purple-l:#8b5cf6;--purple-ll:#f3f0ff;--purple-d:#4c1d95;
+  --green:#10b981;--green-l:#d1fae5;--red:#ef4444;--red-l:#fee2e2;
+  --yellow:#f59e0b;--yellow-l:#fef3c7;--blue:#3b82f6;--blue-l:#dbeafe;
+  --orange:#f97316;--indigo:#6366f1;--pink:#ec4899;--teal:#14b8a6;
+  --bg:#f0effe;--card:#fff;--border:#e8e3ff;--text:#1e1b4b;--muted:#6b7280;
+  --topbar-h:58px;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);background:var(--card);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;z-index:100;box-shadow:0 2px 12px rgba(124,58,237,0.06)}
+.tb-brand{display:flex;align-items:center;gap:8px;flex-shrink:0;text-decoration:none}
+.tb-crown{width:36px;height:36px;background:var(--purple);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.tb-name{font-size:14px;font-weight:800;color:var(--purple-d);line-height:1.1}
+.tb-sub{font-size:10px;color:var(--muted)}
+.tb-nav{display:flex;gap:2px;margin:0 auto}
+.tb-nav a{padding:7px 13px;border-radius:8px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;transition:all 0.15s;white-space:nowrap}
+.tb-nav a:hover{background:var(--purple-ll);color:var(--purple)}
+.tb-nav a.active{background:var(--purple);color:#fff}
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.tb-user{width:34px;height:34px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;cursor:pointer}
+.menu-btn{display:none;background:none;border:none;font-size:22px;color:var(--purple);cursor:pointer;padding:4px}
+
+/* ── MOBILE NAV ── */
+.mob-nav{display:none;position:fixed;top:var(--topbar-h);left:0;right:0;background:var(--card);border-bottom:1.5px solid var(--border);padding:10px 16px;z-index:99;flex-direction:column;gap:4px;box-shadow:0 8px 24px rgba(124,58,237,0.1)}
+.mob-nav.open{display:flex}
+.mob-nav a{padding:10px 14px;border-radius:9px;font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:8px;transition:all 0.15s}
+.mob-nav a:hover{background:var(--purple-ll);color:var(--purple)}
+.mob-nav a.active{background:var(--purple);color:#fff}
+
+/* ── BODY ── */
+.body{margin-top:calc(var(--topbar-h) + 20px);padding:0 20px 40px;max-width:1400px;margin-left:auto;margin-right:auto}
+.welcome{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.welcome h2{font-size:20px;font-weight:800;color:var(--purple-d)}
+.welcome p{font-size:12px;color:var(--muted);margin-top:2px}
+.quick-btns{display:flex;gap:8px}
+.qb{padding:9px 18px;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;font-family:var(--font)}
+.qb:hover{transform:translateY(-1px)}
+.qb-inv{background:var(--purple);color:#fff}
+.qb-pur{background:var(--orange);color:#fff}
+
+/* ── STAT CARDS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat-card{border-radius:12px;padding:12px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.stat-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.15)}
+.sc-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.sc-icon{font-size:16px}
+.sc-title{.sc-title{font-size:11px;font-weight:700;color:#fff}
+.sc-divider{height:1px;background:rgba(255,255,255,0.2);margin-bottom:7px}
+.sc-row{display:flex;justify-content:space-between;margin-bottom:5px}
+.sc-label{font-size:10px;color:rgba(255,255,255,0.7)}
+.sc-val{font-size:11px;font-weight:700}
+.sc-total-row{margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.2);display:flex;justify-content:space-between;align-items:center}
+.sc-total-label{font-size:11px;color:rgba(255,255,255,0.8);font-weight:600}
+.sc-total-val{font-size:14px;font-weight:800;color:#fff}
+.sc-arrow{position:absolute;right:12px;top:12px;font-size:14px;color:rgba(255,255,255,0.3);transition:all 0.2s}
+.stat-card:hover .sc-arrow{color:rgba(255,255,255,0.9);right:8px}
+.sc-badge{position:absolute;top:10px;right:30px;background:rgba(255,255,255,0.2);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff}
+.v-yellow{color:#fde68a}.v-green{color:#a7f3d0}.v-red{color:#fecaca}.v-white{color:#fff}.v-blue{color:#bfdbfe}.v-pink{color:#fbcfe8}
+.c-purple{background:var(--purple)}
+.c-orange{background:var(--orange)}
+.c-green{background:var(--green)}
+.c-red{background:var(--red)}
+.c-blue{background:var(--blue)}
+.c-indigo{background:var(--indigo)}
+.c-pink{background:var(--pink)}
+.c-teal{background:var(--teal)}
+
+/* ── BOTTOM GRID ── */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.widget{background:var(--card);border-radius:14px;border:1.5px solid var(--border);padding:16px}
+.widget-title{font-size:13px;font-weight:800;color:var(--purple-d);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.wt-link{font-size:11px;color:var(--purple);font-weight:700;cursor:pointer;background:none;border:none;font-family:var(--font)}
+
+/* Alert items */
+.alert-item{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;cursor:pointer;transition:all 0.15s;margin-bottom:3px}
+.alert-item:hover{background:var(--red-l)}
+.ai-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ai-name{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.ai-qty{font-size:11px;font-weight:700}
+.ai-wa{background:none;border:1px solid var(--green);color:var(--green);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font)}
+
+/* Recent invoices */
+.txn-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;transition:all 0.15s;margin-bottom:3px}
+.txn-item:hover{background:var(--purple-ll)}
+.txn-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+.txn-info{flex:1;min-width:0}
+.txn-name{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-meta{font-size:10px;color:var(--muted);margin-top:1px}
+.txn-right{text-align:right;flex-shrink:0}
+.txn-amt{font-size:13px;font-weight:800;color:var(--text)}
+.txn-bal{font-size:10px;font-weight:700;margin-top:1px}
+.tb-paid{color:var(--green)}.tb-due{color:var(--red)}
+
+/* ── POPUP OVERLAY ── */
+.popup-overlay{position:fixed;inset:0;background:rgba(76,29,149,0.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;display:none}
+.popup-overlay.open{display:flex}
+.popup{background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:460px;max-height:85vh;overflow-y:auto}
+.popup-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.popup-title{font-size:15px;font-weight:800;color:var(--purple-d)}
+.popup-close{background:var(--red-l);border:none;color:var(--red);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
+
+/* Choose grid */
+.choose-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ch-btn{border-radius:12px;padding:14px;cursor:pointer;border:2px solid transparent;text-align:center;transition:all 0.2s}
+.ch-btn:hover{transform:translateY(-2px)}
+.ch-icon{font-size:22px;margin-bottom:5px}
+.ch-label{font-size:12px;font-weight:700;color:#374151;transition:color 0.2s}
+.ch-amt{font-size:15px;font-weight:800;transition:color 0.2s}
+.ch-count{font-size:10px;color:var(--muted);transition:color 0.2s}
+.ch-full{grid-column:1/-1}
+
+/* Search in popup */
+.pop-search{position:relative;margin-bottom:7px}
+.pop-search input{width:100%;padding:10px 14px 10px 35px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:var(--font);outline:none;background:#f9f8ff;transition:border 0.2s}
+.pop-search input:focus{border-color:var(--purple);background:#fff}
+.pop-search .si{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px}
+.pop-count{font-size:11px;color:var(--muted);margin-bottom:8px}
+
+/* List items in popup */
+.pop-list{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto}
+.pop-item{border-radius:10px;padding:11px;border:1.5px solid var(--border);cursor:pointer;display:flex;gap:10px;align-items:center;transition:all 0.15s}
+.pop-item:hover{background:var(--purple-ll);border-color:var(--purple)}
+.pi-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+.pi-info{flex:1;min-width:0}
+.pi-name{font-size:12px;font-weight:700;color:var(--text)}
+.pi-meta{font-size:10px;color:var(--muted);margin-top:1px}
+.pi-right{text-align:right;flex-shrink:0}
+.pi-amt{font-size:13px;font-weight:800}
+.pi-sub{font-size:10px;font-weight:600;margin-top:1px}
+.red{color:var(--red)}.green{color:var(--green)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.empty-state{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+
+/* Loading */
+.loading{text-align:center;padding:30px;color:var(--muted);font-size:13px}
+.spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Notification bar */
+.notif-bar{position:fixed;top:var(--topbar-h);left:0;right:0;background:var(--purple-d);color:#fff;padding:10px 20px;font-size:13px;font-weight:700;text-align:center;transform:translateY(-100%);transition:transform 0.3s;z-index:150}
+.notif-bar.show{transform:translateY(0)}
+
+/* Responsive */
+@media(max-width:768px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){
+  .cards-grid{grid-template-columns:repeat(2,1fr)}
+  .bottom-grid{grid-template-columns:1fr}
+  .tb-nav{display:none}
+  .menu-btn{display:block}
+  .body{padding:0 12px 40px}
+  .quick-btns{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Notification Bar -->
+<div class="notif-bar" id="notifBar"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="tb-brand" href="dashboard.html">
+    <div class="tb-crown">👑</div>
+    <div><div class="tb-name">SHAH Group</div><div class="tb-sub">Business Management</div></div>
+  </a>
+  <nav class="tb-nav">
+    <a href="dashboard.html" class="active">🏠 Dashboard</a>
+    <a href="sale.html">🧾 Invoice</a>
+    <a href="purchase.html">🛒 Purchase</a>
+    <a href="customers.html">👥 Customers</a>
+    <a href="suppliers.html">🏭 Suppliers</a>
+    <a href="stock.html">📦 Stock</a>
+    <a href="ledger.html">📒 Ledger</a>
+    <a href="reports.html">📊 Reports</a>
+    <a href="settings.html">⚙️ Settings</a>
+  </nav>
+  <div class="tb-right">
+    <button class="menu-btn" onclick="toggleMobileNav()">☰</button>
+    <div class="tb-user" id="tbUser">A</div>
+    <button onclick="logout()" style="background:var(--red-l);border:none;color:var(--red);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font)">🚪 Logout</button>
+  </div>
+</div>
+
+<!-- Mobile Nav -->
+<nav class="mob-nav" id="mobNav">
+  <a href="dashboard.html" class="active">🏠 Dashboard</a>
+  <a href="sale.html">🧾 Invoice</a>
+  <a href="purchase.html">🛒 Purchase</a>
+  <a href="customers.html">👥 Customers</a>
+  <a href="suppliers.html">🏭 Suppliers</a>
+  <a href="stock.html">📦 Stock</a>
+  <a href="ledger.html">📒 Ledger</a>
+  <a href="reports.html">📊 Reports</a>
+  <a href="settings.html">⚙️ Settings</a>
+</nav>
+
+<!-- BODY -->
+<div class="body" id="mainBody">
+
+  <!-- Welcome -->
+  <div class="welcome">
+    <div>
+      <h2 id="welcomeMsg">Loading...</h2>
+      <p id="welcomeDate"></p>
+    </div>
+    <div class="quick-btns">
+      <button class="qb qb-inv" onclick="window.location.href='sale.html'">🧾 New Invoice</button>
+      <button class="qb qb-pur" onclick="window.location.href='purchase.html'">🛒 New Purchase</button>
+    </div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="cards-grid" id="cardsGrid">
+    <!-- Sale Card -->
+    <div class="stat-card c-purple" onclick="openSalePopup()">
+      <div class="sc-arrow">→</div>
+      <div class="sc-top"><div class="sc-icon">🧾</div><div class="sc-title">Aaj Ki Sale</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-row"><span class="sc-label">Retail</span><span class="sc-val v-yellow" id="d-retail">---</span></div>
+      <div class="sc-row"><span class="sc-label">Wholesale</span><span class="sc-val v-green" id="d-wholesale">---</span></div>
+      <div class="sc-total-row"><span class="sc-total-label">Total</span><span class="sc-total-val" id="d-sale-total">---</span></div>
+    </div>
+
+    <!-- Stock Card -->
+    <div class="stat-card c-orange" onclick="openStockPopup()">
+      <div class="sc-arrow">→</div>
+      <div class="sc-top"><div class="sc-icon">📦</div><div class="sc-title">Stock</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-row"><span class="sc-label">Total Items</span><span class="sc-val v-white" id="d-stock-total">---</span></div>
+      <div class="sc-row"><span class="sc-label">OK Stock</span><span class="sc-val v-green" id="d-stock-ok">---</span></div>
+      <div class="sc-row"><span class="sc-label">Low Stock</span><span class="sc-val v-red" id="d-stock-low">---</span></div>
+      <div class="sc-total-row"><span class="sc-total-label">Alert</span><span class="sc-total-val" id="d-stock-alert" style="font-size:14px">---</span></div>
+    </div>
+
+    <!-- Lena Card -->
+    <div class="stat-card c-green" onclick="openLedgerPopup('CUSTOMER')">
+      <div class="sc-arrow">→</div>
+      <div class="sc-top"><div class="sc-icon">📥</div><div class="sc-title">Total Lena</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-row"><span class="sc-label">Customers</span><span class="sc-val v-white" id="d-lena-count">---</span></div>
+      <div class="sc-row"><span class="sc-label">Cash Mila</span><span class="sc-val v-green" id="d-cash">---</span></div>
+      <div class="sc-row"><span class="sc-label">Online Mila</span><span class="sc-val v-blue" id="d-online">---</span></div>
+      <div class="sc-total-row"><span class="sc-total-label">Total</span><span class="sc-total-val" id="d-lena-total">---</span></div>
+    </div>
+
+    <!-- Dena Card -->
+    <div class="stat-card c-red" onclick="openLedgerPopup('SUPPLIER')">
+      <div class="sc-arrow">→</div>
+      <div class="sc-badge" id="d-dena-badge" style="display:none">!</div>
+      <div class="sc-top"><div class="sc-icon">📤</div><div class="sc-title">Total Dena</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-row"><span class="sc-label">Suppliers</span><span class="sc-val v-white" id="d-dena-count">---</span></div>
+      <div class="sc-row"><span class="sc-label">Is Mahine</span><span class="sc-val v-red" id="d-pur-month">---</span></div>
+      <div class="sc-row"><span class="sc-label">Aaj Purchase</span><span class="sc-val v-yellow" id="d-pur-today">---</span></div>
+      <div class="sc-total-row"><span class="sc-total-label">Total</span><span class="sc-total-val" id="d-dena-total">---</span></div>
+    </div>
+
+    <!-- Purchase Card -->
+    <div class="stat-card c-blue" onclick="window.location.href='purchase.html'">
+      <div class="sc-arrow">→</div>
+      <div class="sc-top"><div class="sc-icon">🛒</div><div class="sc-title">Aaj Purchase</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-row"><span class="sc-label">Paid</span><span class="sc-val v-green" id="d-pur-paid">---</span></div>
+      <div class="sc-row"><span class="sc-label">Baaki</span><span class="sc-val v-red" id="d-pur-bal">---</span></div>
+      <div class="sc-total-row"><span class="sc-total-label">Total</span><span class="sc-total-val" id="d-pur-total">---</span></div>
+    </div>
+
+    <!-- Profit Card -->
+    <div class="stat-card c-teal" onclick="window.location.href='reports.html'">
+      <div class="sc-arrow">→</div>
+      <div class="sc-top"><div class="sc-icon">📈</div><div class="sc-title">Aaj Profit</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-row"><span class="sc-label">Collected</span><span class="sc-val v-green" id="d-collected">---</span></div>
+      <div class="sc-row"><span class="sc-label">Expenses</span><span class="sc-val v-red" id="d-expense">---</span></div>
+      <div class="sc-row"><span class="sc-label">Service</span><span class="sc-val v-blue" id="d-service">---</span></div>
+      <div class="sc-total-row"><span class="sc-total-label">Net Profit</span><span class="sc-total-val" id="d-profit">---</span></div>
+    </div>
+
+    <!-- Customers Card -->
+    <div class="stat-card c-indigo" onclick="window.location.href='customers.html'">
+      <div class="sc-arrow">→</div>
+      <div class="sc-top"><div class="sc-icon">👥</div><div class="sc-title">Customers</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-row"><span class="sc-label">Total</span><span class="sc-val v-white" id="d-cus-total">---</span></div>
+      <div class="sc-row"><span class="sc-label">Aaj Sale</span><span class="sc-val v-green" id="d-cus-today">---</span></div>
+      <div class="sc-row"><span class="sc-label">Walk-in</span><span class="sc-val v-yellow" id="d-cus-walkin">---</span></div>
+      <div class="sc-total-row"><span class="sc-total-label">Invoices Aaj</span><span class="sc-total-val" id="d-inv-count">---</span></div>
+    </div>
+
+    <!-- Suppliers Card -->
+    <div class="stat-card c-pink" onclick="window.location.href='suppliers.html'">
+      <div class="sc-arrow">→</div>
+      <div class="sc-top"><div class="sc-icon">🏭</div><div class="sc-title">Suppliers</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-row"><span class="sc-label">Total</span><span class="sc-val v-white" id="d-sup-total">---</span></div>
+      <div class="sc-row"><span class="sc-label">Aaj Purchase</span><span class="sc-val v-pink" id="d-sup-today">---</span></div>
+      <div class="sc-row"><span class="sc-label">Net Position</span><span class="sc-val v-green" id="d-net">---</span></div>
+      <div class="sc-total-row"><span class="sc-total-label">Clear Accounts</span><span class="sc-total-val" id="d-sup-clear">---</span></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM WIDGETS -->
+  <div class="bottom-grid">
+    <!-- Low Stock -->
+    <div class="widget">
+      <div class="widget-title">
+        ⚠️ Low Stock Alert
+        <button class="wt-link" onclick="openStockPopup()">Sab Dekhein →</button>
+      </div>
+      <div id="lowStockList"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    </div>
+
+    <!-- Recent Invoices -->
+    <div class="widget">
+      <div class="widget-title">
+        🧾 Recent Invoices
+        <button class="wt-link" onclick="openSalePopup()">Sab Dekhein →</button>
+      </div>
+      <div id="recentInvList"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     POPUPS
+════════════════════════════════════════════════ -->
+
+<!-- SALE POPUP -->
+<div class="popup-overlay" id="salePopup">
+  <div class="popup">
+    <div class="popup-header">
+      <div class="popup-title">🧾 Aaj Ki Sale</div>
+      <button class="popup-close" onclick="closePopup('salePopup')">✕</button>
+    </div>
+    <div class="choose-grid" id="saleChooseGrid"></div>
+    <div class="pop-search"><span class="si">🔍</span><input type="text" id="saleQ" placeholder="Customer naam, INV-ID..." oninput="filterSale(this.value)"></div>
+    <div class="pop-count" id="saleCnt"></div>
+    <div class="pop-list" id="saleList"></div>
+  </div>
+</div>
+
+<!-- STOCK POPUP -->
+<div class="popup-overlay" id="stockPopup">
+  <div class="popup">
+    <div class="popup-header">
+      <div class="popup-title">📦 Stock</div>
+      <button class="popup-close" onclick="closePopup('stockPopup')">✕</button>
+    </div>
+    <div class="choose-grid" id="stockChooseGrid"></div>
+    <div class="pop-search"><span class="si">🔍</span><input type="text" id="stockQ" placeholder="Item naam, quality, company..." oninput="filterStock(this.value)"></div>
+    <div class="pop-count" id="stockCnt"></div>
+    <div class="pop-list" id="stockList"></div>
+  </div>
+</div>
+
+<!-- LEDGER POPUP -->
+<div class="popup-overlay" id="ledgerPopup">
+  <div class="popup">
+    <div class="popup-header">
+      <div class="popup-title" id="ledgerPopupTitle">📒 Ledger</div>
+      <button class="popup-close" onclick="closePopup('ledgerPopup')">✕</button>
+    </div>
+    <div class="choose-grid" id="ledgerChooseGrid"></div>
+    <div class="pop-search"><span class="si">🔍</span><input type="text" id="ledgerQ" placeholder="Naam, ID, phone..." oninput="filterLedger(this.value)"></div>
+    <div class="pop-count" id="ledgerCnt"></div>
+    <div class="pop-list" id="ledgerList"></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+requireLogin();
+const user = getUser();
+document.getElementById('tbUser').textContent = user.name[0].toUpperCase();
+
+// Welcome
+const now = new Date();
+const hr   = now.getHours();
+const greet = hr<12?'Subah Bakhair':hr<17?'Dopahar Mubarak':'Shaam Bakhair';
+document.getElementById('welcomeMsg').textContent = greet+', '+user.name+'! 👋';
+document.getElementById('welcomeDate').textContent = now.toLocaleDateString('en-PK',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// Mobile nav
+function toggleMobileNav(){ document.getElementById('mobNav').classList.toggle('open'); }
+
+// Notification
+function showNotif(msg){ const n=document.getElementById('notifBar'); n.textContent='🔗 '+msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),2000); }
+
+// Close popups
+function closePopup(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.popup-overlay').forEach(el=>el.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+
+// Format money
+function fmt(n){ return 'Rs.'+Number(n||0).toLocaleString('en-PK',{minimumFractionDigits:0}); }
+function hl(t,q){if(!q)return String(t||'');const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');return String(t||'').replace(re,'<mark style="background:#fde68a;border-radius:3px;padding:0 2px;color:#92400e;font-weight:700">$1</mark>');}
+
+// ── LOAD DASHBOARD DATA ───────────────────────────────────────
+let dashData=null, allInvoices=[], allStock=[], allCustomers=[], allSuppliers=[];
+
+async function loadDashboard(){
+  try {
+    const [dash, txns, stock, cus, sup] = await Promise.all([
+      apiGet('getDashboard'),
+      apiGet('getTransactions',{limit:50}),
+      apiGet('getStock'),
+      apiGet('getCustomers'),
+      apiGet('getSuppliers')
+    ]);
+
+    if(dash.success){
+      dashData = dash.data;
+      updateCards(dashData);
+    }
+    if(txns.success)  allInvoices  = txns.data||[];
+    if(stock.success) allStock     = stock.data||[];
+    if(cus.success)   allCustomers = cus.data||[];
+    if(sup.success)   allSuppliers = sup.data||[];
+
+    renderLowStock();
+    renderRecentInvoices();
+
+  } catch(e){
+    document.getElementById('welcomeMsg').textContent = 'Network Error — '+e.message;
+  }
+}
+
+function updateCards(d){
+  // Sale
+  document.getElementById('d-retail').textContent    = fmt(d.retailAmount);
+  document.getElementById('d-wholesale').textContent = fmt(d.wholesaleAmount);
+  document.getElementById('d-sale-total').textContent= fmt(d.todaySaleAmount);
+
+  // Stock
+  const lowCount = d.lowStockCount||0;
+  document.getElementById('d-stock-low').textContent   = lowCount+' items ⚠️';
+  document.getElementById('d-stock-alert').textContent = lowCount>0?lowCount+' Reorder!':'OK ✓';
+
+  // Lena
+  document.getElementById('d-lena-total').textContent = fmt(d.totalLena);
+  document.getElementById('d-cash').textContent       = fmt(d.cashAmount);
+  document.getElementById('d-online').textContent     = fmt(d.onlineAmount);
+
+  // Dena
+  document.getElementById('d-dena-total').textContent = fmt(d.totalDena);
+  document.getElementById('d-pur-today').textContent  = fmt(d.todayPurchase);
+  if(d.totalDena>0) document.getElementById('d-dena-badge').style.display='block';
+
+  // Purchase
+  document.getElementById('d-pur-total').textContent = fmt(d.todayPurchase);
+
+  // Profit
+  document.getElementById('d-collected').textContent = fmt(d.todayCollected);
+  document.getElementById('d-expense').textContent   = fmt(d.todayExpense);
+  document.getElementById('d-service').textContent   = fmt(d.serviceAmount||0);
+  document.getElementById('d-profit').textContent    = fmt(d.todayProfit);
+
+  // Invoices count
+  document.getElementById('d-inv-count').textContent = (d.todaySaleCount||0)+' bills';
+}
+
+// ── LOW STOCK WIDGET ──────────────────────────────────────────
+function renderLowStock(){
+  const low = allStock.filter(s=>Number(s.CurrentQty)<=Number(s.MinLevel));
+  const el  = document.getElementById('lowStockList');
+
+  // Update stock card counts
+  document.getElementById('d-stock-total').textContent = allStock.length+' items';
+  document.getElementById('d-stock-ok').textContent    = (allStock.length-low.length)+' items';
+
+  if(!low.length){
+    el.innerHTML='<div class="empty-state">✅ Sab stock theek hai!</div>';
+    return;
+  }
+  el.innerHTML = low.slice(0,5).map(s=>`
+    <div class="alert-item">
+      <div class="ai-dot" style="background:${Number(s.CurrentQty)===0?'#dc2626':'#f59e0b'}"></div>
+      <div class="ai-name">${s.ItemName} <span style="font-size:10px;color:var(--muted)">(${s.Quality||''})</span></div>
+      <div class="ai-qty" style="color:${Number(s.CurrentQty)===0?'var(--red)':'var(--yellow)'}">
+        ${s.CurrentQty} ${s.Unit||''}
+      </div>
+      <button class="ai-wa" onclick="event.stopPropagation();showNotif('WhatsApp supplier...')">📱</button>
+    </div>`).join('');
+}
+
+// ── RECENT INVOICES WIDGET ────────────────────────────────────
+const avatarColors=['#7c3aed','#f97316','#10b981','#ef4444','#3b82f6','#ec4899','#6366f1','#14b8a6'];
+function getAvatarColor(name){ let h=0; for(let c of (name||''))h=c.charCodeAt(0)+((h<<5)-h); return avatarColors[Math.abs(h)%avatarColors.length]; }
+function getInit(name){ return (name||'?').split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase()||'??'; }
+
+function renderRecentInvoices(){
+  const el   = document.getElementById('recentInvList');
+  const data = allInvoices.slice(0,5);
+
+  // Update customer card
+  const todaySales = allInvoices.filter(t=>String(t.Date||'').includes(new Date().toLocaleDateString('en-PK')));
+  const wkSales    = todaySales.filter(t=>String(t.CustomerID||'').startsWith('WK'));
+  document.getElementById('d-cus-total').textContent   = allCustomers.length+' log';
+  document.getElementById('d-cus-today').textContent   = todaySales.length+' sales';
+  document.getElementById('d-cus-walkin').textContent  = wkSales.length+' log';
+  document.getElementById('d-sup-total').textContent   = allSuppliers.length+' log';
+  document.getElementById('d-lena-count').textContent  = allCustomers.filter(c=>Number(c.OpeningBalance)>0).length+' log';
+  document.getElementById('d-dena-count').textContent  = allSuppliers.length+' log';
+
+  if(!data.length){ el.innerHTML='<div class="empty-state">Koi invoice nahi</div>'; return; }
+  el.innerHTML = data.map(t=>`
+    <div class="txn-item" onclick="window.location.href='sale.html'">
+      <div class="txn-av" style="background:${getAvatarColor(t.CustomerName)}">${getInit(t.CustomerName)}</div>
+      <div class="txn-info">
+        <div class="txn-name">${t.CustomerName||'Walk-in'}</div>
+        <div class="txn-meta">${t.ID} • ${String(t.Date||'').substring(0,10)}</div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amt">${fmt(t.Total)}</div>
+        <div class="txn-bal ${Number(t.Balance)>0?'tb-due':'tb-paid'}">${Number(t.Balance)>0?'Baaki '+fmt(t.Balance):'Clear ✓'}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── SALE POPUP ────────────────────────────────────────────────
+let saleFilter='all';
+function openSalePopup(){
+  // Choose buttons
+  const retail    = allInvoices.filter(t=>t.SaleType==='retail');
+  const wholesale = allInvoices.filter(t=>t.SaleType==='wholesale');
+  const rAmt = retail.reduce((s,t)=>s+Number(t.Total),0);
+  const wAmt = wholesale.reduce((s,t)=>s+Number(t.Total),0);
+
+  document.getElementById('saleChooseGrid').innerHTML=`
+    <div class="ch-btn" style="background:#fef3c7;border-color:#f59e0b" onclick="setSaleFilter('retail',this)">
+      <div class="ch-icon">🏪</div><div class="ch-label">Retail</div>
+      <div class="ch-amt" style="color:#92400e">${fmt(rAmt)}</div>
+      <div class="ch-count">${retail.length} invoices</div>
+    </div>
+    <div class="ch-btn" style="background:#d1fae5;border-color:#10b981" onclick="setSaleFilter('wholesale',this)">
+      <div class="ch-icon">🏭</div><div class="ch-label">Wholesale</div>
+      <div class="ch-amt" style="color:#065f46">${fmt(wAmt)}</div>
+      <div class="ch-count">${wholesale.length} invoices</div>
+    </div>
+    <div class="ch-btn ch-full" style="background:var(--purple-ll);border-color:var(--purple)" onclick="setSaleFilter('all',this)">
+      <div class="ch-icon">📊</div><div class="ch-label">Sab Invoices</div>
+      <div class="ch-amt" style="color:var(--purple)">${fmt(rAmt+wAmt)}</div>
+      <div class="ch-count">${allInvoices.length} invoices</div>
+    </div>`;
+
+  saleFilter='all';
+  document.getElementById('saleQ').value='';
+  filterSale('');
+  document.getElementById('salePopup').classList.add('open');
+  setTimeout(()=>document.getElementById('saleQ').focus(),200);
+}
+function setSaleFilter(f,btn){
+  saleFilter=f;
+  document.querySelectorAll('#saleChooseGrid .ch-btn').forEach(b=>{b.style.opacity='0.6';b.style.transform='none';});
+  btn.style.opacity='1';btn.style.transform='scale(1.02)';
+  filterSale(document.getElementById('saleQ').value);
+}
+function filterSale(q){
+  let data = saleFilter==='all'?allInvoices:allInvoices.filter(t=>t.SaleType===saleFilter);
+  if(q.trim()) data=data.filter(t=>
+    String(t.ID||'').toLowerCase().includes(q.toLowerCase())||
+    String(t.CustomerName||'').toLowerCase().includes(q.toLowerCase())||
+    String(t.CustomerID||'').toLowerCase().includes(q.toLowerCase())
+  );
+  document.getElementById('saleCnt').textContent=data.length+' invoices';
+  document.getElementById('saleList').innerHTML=!data.length
+    ?'<div class="empty-state">Koi invoice nahi mili</div>'
+    :data.slice(0,20).map(t=>`
+      <div class="pop-item" onclick="window.location.href='sale.html'">
+        <div class="pi-av" style="background:${getAvatarColor(t.CustomerName)}">${getInit(t.CustomerName)}</div>
+        <div class="pi-info">
+          <div class="pi-name">${hl(t.CustomerName||'Walk-in',q)}</div>
+          <div class="pi-meta">${hl(t.ID,q)} • ${String(t.Date||'').substring(0,10)}</div>
+        </div>
+        <div class="pi-right">
+          <div class="pi-amt" style="color:var(--purple)">${fmt(t.Total)}</div>
+          <div class="pi-sub ${Number(t.Balance)>0?'red':'green'}">${Number(t.Balance)>0?'Baaki '+fmt(t.Balance):'Clear ✓'}</div>
+        </div>
+      </div>`).join('');
+}
+
+// ── STOCK POPUP ───────────────────────────────────────────────
+let stockFilter='all';
+function openStockPopup(){
+  const low = allStock.filter(s=>Number(s.CurrentQty)<=Number(s.MinLevel));
+  const ok  = allStock.filter(s=>Number(s.CurrentQty)>Number(s.MinLevel));
+  document.getElementById('stockChooseGrid').innerHTML=`
+    <div class="ch-btn" style="background:#d1fae5;border-color:#10b981" onclick="setStockFilter('ok',this)">
+      <div class="ch-icon">✅</div><div class="ch-label">OK Stock</div>
+      <div class="ch-amt" style="color:#065f46">${ok.length} Items</div>
+      <div class="ch-count">Theek hai</div>
+    </div>
+    <div class="ch-btn" style="background:var(--red-l);border-color:var(--red)" onclick="setStockFilter('low',this)">
+      <div class="ch-icon">⚠️</div><div class="ch-label">Low Stock</div>
+      <div class="ch-amt" style="color:var(--red)">${low.length} Items</div>
+      <div class="ch-count">Order karein!</div>
+    </div>
+    <div class="ch-btn ch-full" style="background:var(--purple-ll);border-color:var(--purple)" onclick="setStockFilter('all',this)">
+      <div class="ch-icon">📦</div><div class="ch-label">Sab Items</div>
+      <div class="ch-amt" style="color:var(--purple)">${allStock.length} Items</div>
+      <div class="ch-count">Poora stock</div>
+    </div>`;
+  stockFilter='all';
+  document.getElementById('stockQ').value='';
+  filterStock('');
+  document.getElementById('stockPopup').classList.add('open');
+  setTimeout(()=>document.getElementById('stockQ').focus(),200);
+}
+function setStockFilter(f,btn){
+  stockFilter=f;
+  document.querySelectorAll('#stockChooseGrid .ch-btn').forEach(b=>{b.style.opacity='0.6';});
+  btn.style.opacity='1';
+  filterStock(document.getElementById('stockQ').value);
+}
+function filterStock(q){
+  let data=allStock;
+  if(stockFilter==='low') data=data.filter(s=>Number(s.CurrentQty)<=Number(s.MinLevel));
+  else if(stockFilter==='ok') data=data.filter(s=>Number(s.CurrentQty)>Number(s.MinLevel));
+  if(q.trim()) data=data.filter(s=>
+    String(s.ItemName||'').toLowerCase().includes(q.toLowerCase())||
+    String(s.Quality||'').toLowerCase().includes(q.toLowerCase())||
+    String(s.Company||'').toLowerCase().includes(q.toLowerCase())
+  );
+  document.getElementById('stockCnt').textContent=data.length+' items';
+  document.getElementById('stockList').innerHTML=!data.length
+    ?'<div class="empty-state">Koi item nahi mila</div>'
+    :data.slice(0,20).map(s=>{
+      const isLow=Number(s.CurrentQty)<=Number(s.MinLevel);
+      return`<div class="pop-item" onclick="window.location.href='stock.html'">
+        <div class="pi-av" style="background:${isLow?'#ef4444':'#10b981'};border-radius:10px">📦</div>
+        <div class="pi-info">
+          <div class="pi-name">${hl(s.ItemName,q)} <span class="badge" style="background:${isLow?'var(--red-l)':'var(--green-l)'};color:${isLow?'var(--red)':'var(--green)'}">${isLow?'⚠️ Low':'✅ OK'}</span></div>
+          <div class="pi-meta">${hl(s.Quality||'',q)} • ${hl(s.Company||'',q)}</div>
+        </div>
+        <div class="pi-right">
+          <div class="pi-amt" style="color:${isLow?'var(--red)':'var(--green)'}">${s.CurrentQty} ${s.Unit||''}</div>
+          <div class="pi-sub" style="color:var(--muted)">Min: ${s.MinLevel}</div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+// ── LEDGER POPUP ──────────────────────────────────────────────
+let ledgerType='CUSTOMER', ledgerFilter='all';
+async function openLedgerPopup(type){
+  ledgerType=type;
+  ledgerFilter='all';
+  document.getElementById('ledgerPopupTitle').textContent = type==='CUSTOMER'?'📥 Customers — Lena Hai':'📤 Suppliers — Dena Hai';
+  document.getElementById('ledgerQ').value='';
+
+  const res = await apiGet('getLedgerSummary',{});
+  if(!res.success) return;
+
+  const data    = type==='CUSTOMER'?allCustomers:allSuppliers;
+  const balMap  = type==='CUSTOMER'?res.data.customers:res.data.suppliers;
+  const lena    = type==='CUSTOMER'?res.data.totalLena:res.data.totalDena;
+  const baaki   = data.filter(p=>Number(balMap[p.ID]||0)>0).length;
+  const clear   = data.length - baaki;
+
+  document.getElementById('ledgerChooseGrid').innerHTML=`
+    <div class="ch-btn" style="background:var(--red-l);border-color:var(--red)" onclick="setLedgerFilter('baaki',this)">
+      <div class="ch-icon">${type==='CUSTOMER'?'💰':'🚨'}</div>
+      <div class="ch-label">${type==='CUSTOMER'?'Lena Hai':'Dena Hai'}</div>
+      <div class="ch-amt" style="color:var(--red)">${baaki} log</div>
+      <div class="ch-count">${fmt(lena)}</div>
+    </div>
+    <div class="ch-btn" style="background:var(--green-l);border-color:var(--green)" onclick="setLedgerFilter('clear',this)">
+      <div class="ch-icon">✅</div><div class="ch-label">Clear</div>
+      <div class="ch-amt" style="color:var(--green)">${clear} log</div>
+      <div class="ch-count">Balance zero</div>
+    </div>
+    <div class="ch-btn ch-full" style="background:var(--purple-ll);border-color:var(--purple)" onclick="setLedgerFilter('all',this)">
+      <div class="ch-icon">📋</div><div class="ch-label">Sab</div>
+      <div class="ch-amt" style="color:var(--purple)">${data.length} log</div>
+      <div class="ch-count">Poori list</div>
+    </div>`;
+
+  window._ledgerBalMap = balMap;
+  filterLedger('');
+  document.getElementById('ledgerPopup').classList.add('open');
+  setTimeout(()=>document.getElementById('ledgerQ').focus(),200);
+}
+function setLedgerFilter(f,btn){
+  ledgerFilter=f;
+  document.querySelectorAll('#ledgerChooseGrid .ch-btn').forEach(b=>b.style.opacity='0.6');
+  btn.style.opacity='1';
+  filterLedger(document.getElementById('ledgerQ').value);
+}
+function filterLedger(q){
+  const data   = ledgerType==='CUSTOMER'?allCustomers:allSuppliers;
+  const balMap = window._ledgerBalMap||{};
+  let filtered = data;
+  if(ledgerFilter==='baaki') filtered=filtered.filter(p=>Number(balMap[p.ID]||0)>0);
+  else if(ledgerFilter==='clear') filtered=filtered.filter(p=>Number(balMap[p.ID]||0)===0);
+  if(q.trim()) filtered=filtered.filter(p=>
+    String(p.Name||'').toLowerCase().includes(q.toLowerCase())||
+    String(p.ID||'').toLowerCase().includes(q.toLowerCase())||
+    String(p.Phone||'').includes(q)
+  );
+  document.getElementById('ledgerCnt').textContent=filtered.length+' log';
+  const link = ledgerType==='CUSTOMER'?'customers.html':'suppliers.html';
+  document.getElementById('ledgerList').innerHTML=!filtered.length
+    ?'<div class="empty-state">Koi record nahi mila</div>'
+    :filtered.slice(0,20).map(p=>{
+      const bal=Number(balMap[p.ID]||0);
+      const init=getInit(p.Name);
+      const color=getAvatarColor(p.Name);
+      return`<div class="pop-item" onclick="window.location.href='${link}'">
+        <div class="pi-av" style="background:${color}">${init}</div>
+        <div class="pi-info">
+          <div class="pi-name">${hl(p.Name,q)}</div>
+          <div class="pi-meta">${hl(p.ID,q)} • ${hl(p.Phone||'',q)}</div>
+        </div>
+        <div class="pi-right">
+          <div class="pi-amt ${bal>0?'red':'green'}">${bal>0?fmt(bal):'Clear ✓'}</div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+// Load
+loadDashboard();
+</script>
+</body>
+</html>
